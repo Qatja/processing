@@ -24,20 +24,7 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import processing.core.PApplet;
-import se.goransson.qatja.messages.MQTTConnack;
-import se.goransson.qatja.messages.MQTTConnect;
-import se.goransson.qatja.messages.MQTTDisconnect;
-import se.goransson.qatja.messages.MQTTMessage;
-import se.goransson.qatja.messages.MQTTPingreq;
-import se.goransson.qatja.messages.MQTTPuback;
-import se.goransson.qatja.messages.MQTTPubcomp;
-import se.goransson.qatja.messages.MQTTPublish;
-import se.goransson.qatja.messages.MQTTPubrec;
-import se.goransson.qatja.messages.MQTTPubrel;
-import se.goransson.qatja.messages.MQTTSuback;
-import se.goransson.qatja.messages.MQTTSubscribe;
-import se.goransson.qatja.messages.MQTTUnsuback;
-import se.goransson.qatja.messages.MQTTUnsubscribe;
+import se.goransson.qatja.messages.*;
 
 /**
  * Main library class

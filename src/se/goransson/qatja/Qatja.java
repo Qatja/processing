@@ -623,7 +623,6 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 						break;
 					case PUBLISH:
 						MQTTPublish publish = new MQTTPublish(buffer, len);
-						System.out.println("MY QOOS: " + publish.getQoS());
 						switch (publish.getQoS()) {
 						case AT_MOST_ONCE:
 							// Do nothing

@@ -293,13 +293,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	public void subscribe(String topic) {
-		// Pattern p = Pattern.compile("[!-()<>/;\\*%$]");
-		// Matcher m = p.matcher(topic);
-		//
-		// if (m.find())
-		// PApplet.println("Topic is not OK, use method subscribe(String topic, String method){} instead!");
-		// else
-		// subscribe(topic, topic);
+		subscribe(topic, AT_MOST_ONCE);
 	}
 
 	public void subscribe(String topic, byte QoS) {

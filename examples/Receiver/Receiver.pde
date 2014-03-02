@@ -6,8 +6,8 @@
  *
  * author: Andreas Göransson, 2014
  */
-import se.goransson.qatja.messages.*;
 import se.goransson.qatja.*;
+import se.goransson.qatja.messages.*;
 
 Qatja client;
 

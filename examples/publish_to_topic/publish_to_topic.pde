@@ -27,7 +27,7 @@ void exit() {
 }
 
 void keyPressed(){
-  String message = "msg" + random(0,10000);
+  String message = "my message" + random(0,10000);
   // 3. Use "publish" to send a message to a specific topic
-  client.publish( "mytopic", "my message" + message );
+  client.publish( "test", message );
 }

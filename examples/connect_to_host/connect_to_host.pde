@@ -13,18 +13,26 @@ void setup() {
   // 1. Initialize the library object
   client = new Qatja( this );
   
+  // To send the disconnect message
+  registerMethod("dispose", this);
+  
   // If you want the debugging messages, set this to true!
   client.DEBUG = true;
   
-  // 2. Request a connection to a broker. The identification
+  // 2. Set connection details
+  client.setKeepalive(5000);
+  client.setHost("localhost");
+  client.setPort(1883);
+  client.setClientIdentifier("qatja-processing");
+  
+  // 3. Request a connection to a broker. The identification
   //    string at the end must be unique for that broker!
-  client.connect( "127.0.0.1", 1883, "qatja-client" );
+  client.connect();
 }
 
 void draw() {
 }
 
-void exit() {
+void dispose() {
   client.disconnect();
-  super.exit();
 }

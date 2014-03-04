@@ -24,7 +24,20 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import processing.core.PApplet;
-import se.goransson.qatja.messages.*;
+import se.goransson.qatja.messages.MQTTConnack;
+import se.goransson.qatja.messages.MQTTConnect;
+import se.goransson.qatja.messages.MQTTDisconnect;
+import se.goransson.qatja.messages.MQTTMessage;
+import se.goransson.qatja.messages.MQTTPingreq;
+import se.goransson.qatja.messages.MQTTPuback;
+import se.goransson.qatja.messages.MQTTPubcomp;
+import se.goransson.qatja.messages.MQTTPublish;
+import se.goransson.qatja.messages.MQTTPubrec;
+import se.goransson.qatja.messages.MQTTPubrel;
+import se.goransson.qatja.messages.MQTTSuback;
+import se.goransson.qatja.messages.MQTTSubscribe;
+import se.goransson.qatja.messages.MQTTUnsuback;
+import se.goransson.qatja.messages.MQTTUnsubscribe;
 
 /**
  * Main library class
@@ -45,6 +58,17 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 
 	private Connection mConnection;
 
+	/** */
+	private String host = null;
+	
+	private int port = -1;
+	
+	private String clientIdentifier = null;
+	
+	private String username = null;
+	
+	private String password = null;
+	
 	private MonitoringThread mMonitoringThread;
 	private KeepaliveThread mKeepaliveThread;
 
@@ -64,7 +88,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	 * 
 	 * This is set at the same time as the {@link #CONNECT} message is created.
 	 */
-	private long keepalive = 10;
+	private int keepalive = 10;
 
 	/**
 	 * Defines at what time the last action was taken by the client (this is
@@ -138,15 +162,88 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	public void setKeepalive(int seconds) {
 		keepalive = seconds;
 	}
+	
+	/**
+	 * @return the clientIdentifier
+	 */
+	public String getClientIdentifier() {
+		return clientIdentifier;
+	}
+
+	/**
+	 * @param clientIdentifier the clientIdentifier to set
+	 */
+	public void setClientIdentifier(String clientIdentifier) {
+		this.clientIdentifier = clientIdentifier;
+	}
+
+	/**
+	 * @return the host
+	 */
+	public String getHost() {
+		return host;
+	}
+
+	/**
+	 * @param host the host to set
+	 */
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	/**
+	 * @return the port
+	 */
+	public int getPort() {
+		return port;
+	}
+
+	/**
+	 * @param port the port to set
+	 */
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	/**
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @param password the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * @return the keepalive
+	 */
+	public long getKeepalive() {
+		return keepalive;
+	}
 
 	/**
 	 * Connect to a MQTT server. This also sends the required connect message.
-	 * 
-	 * @param host
-	 * @param port
-	 * @param id
-	 */
-	public void connect(String host, int port, String id) {
+	 */	
+	public void connect() {
 		InetAddress addr = null;
 		try {
 			addr = InetAddress.getByName(host);
@@ -176,7 +273,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 		Thread thread2 = new Thread(null, mKeepaliveThread, "KeepaliveThread");
 		thread2.start();
 
-		connect(id);
+		sendConnect();
 	}
 
 	/**
@@ -185,11 +282,13 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	 * 
 	 * @param id
 	 */
-	private void connect(String identifier) {
+	private void sendConnect() {
 		if (state == STATE_NONE) {
-			MQTTConnect msg = new MQTTConnect(identifier);
-			keepalive = msg.getKeepAlive();
-			sendMessage(msg, false);
+			MQTTConnect connect;
+			connect = new MQTTConnect(clientIdentifier, username, password, true);
+			
+			keepalive = connect.getKeepAlive();
+			sendMessage(connect, false);
 		} else {
 			if (DEBUG)
 				PApplet.println("Ohno! Something went wrong... MQTT Error, dude... one connection at a time!");
@@ -409,22 +508,18 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 //	}
 
 	private void addSentPackage(MQTTMessage msg) {
-		// System.out.println("addPackage(): " + msg.getPackageIdentifier());
 		sentPackages.put(msg.getPackageIdentifier(), msg);
 	}
 
 	private void removeSentPackage(MQTTMessage msg) {
-		// System.out.println("removePackage(): " + msg.getPackageIdentifier());
 		sentPackages.remove(msg.getPackageIdentifier());
 	}
 	
 	private void addReceivedPackage(MQTTMessage msg) {
-		// System.out.println("addPackage(): " + msg.getPackageIdentifier());
 		receivedPackages.put(msg.getPackageIdentifier(), msg);
 	}
 
 	private void removeReceivedPackage(MQTTMessage msg) {
-		// System.out.println("removePackage(): " + msg.getPackageIdentifier());
 		receivedPackages.remove(msg.getPackageIdentifier());
 	}
 

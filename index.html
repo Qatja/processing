@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Qatja Processing by Qatja</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Qatja Processing</h1>
+        <p>MQTT for processing</p>
+
+        <p class="view"><a href="https://github.com/Qatja/processing">View the Project on GitHub <small>Qatja/processing</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/Qatja/processing/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/Qatja/processing/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/Qatja/processing">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="qatja-processing-library" class="anchor" href="#qatja-processing-library"><span class="octicon octicon-link"></span></a>Qatja Processing library</h1>
+
+<h2>
+<a name="mqtt-311-compliant-client-library-for-processing" class="anchor" href="#mqtt-311-compliant-client-library-for-processing"><span class="octicon octicon-link"></span></a>MQTT 3.1.1 compliant client library for Processing</h2>
+
+<h1>
+<a name="about-mqtt" class="anchor" href="#about-mqtt"><span class="octicon octicon-link"></span></a>About MQTT</h1>
+
+<p>MQTT stands for MQ Telemetry Transport. It is a publish/subscribe, extremely simple and lightweight messaging protocol, designed for constrained devices and low-bandwidth, high-latency or unreliable networks. The design principles are to minimise network bandwidth and device resource requirements whilst also attempting to ensure reliability and some degree of assurance of delivery. These principles also turn out to make the protocol ideal of the emerging “machine-to-machine” (M2M) or “Internet of Things” world of connected devices, and for mobile applications where bandwidth and battery power are at a premium.</p>
+
+<p><em>source: <a href="http://www.mqtt.org">MQTT.org</a></em></p>
+
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<ol>
+<li>Download the latest version <a href="http://www.santiclaws.se/qatja/Qatja.zip">here</a>
+</li>
+<li>Extract the zip-file into your /sketchbook/libraries/ folder.</li>
+<li>Restart Processing IDE</li>
+</ol><h1>
+<a name="getting-started-with-qatja-in-processing" class="anchor" href="#getting-started-with-qatja-in-processing"><span class="octicon octicon-link"></span></a>Getting started with Qatja in Processing.</h1>
+
+<p><strong>Create the library object</strong></p>
+
+<div class="highlight highlight-java"><pre><span class="n">Qatja</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Qatja</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</pre></div>
+
+<p><strong>Subscribing to a topic</strong></p>
+
+<div class="highlight highlight-java"><pre><span class="n">client</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span> <span class="s">"mytopic"</span> <span class="o">);</span>
+
+<span class="kt">void</span> <span class="nf">mqttCallback</span><span class="o">(</span><span class="n">MQTTPublish</span> <span class="n">msg</span><span class="o">){</span>
+  <span class="n">String</span> <span class="n">message</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">msg</span><span class="o">.</span><span class="na">getPayload</span><span class="o">());</span>
+<span class="o">}</span>
+</pre></div>
+
+<p><strong>Publish message to a topic</strong></p>
+
+<div class="highlight highlight-java"><pre><span class="n">String</span> <span class="n">message</span> <span class="o">=</span> <span class="s">"msg"</span> <span class="o">+</span> <span class="n">random</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="mi">1000</span><span class="o">);</span>
+<span class="n">client</span><span class="o">.</span><span class="na">publish</span><span class="o">(</span> <span class="s">"mytopic"</span><span class="o">,</span> <span class="n">message</span> <span class="o">);</span>
+</pre></div>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/Qatja">Qatja</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>

@@ -1,5 +1,6 @@
 /*
- * Qatja
+ * Qatja (https://github.com/Qatja)
+ *
  * Example: Sender
  * 
  * Publishes mouse coordinates to topic

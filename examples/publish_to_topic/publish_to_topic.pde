@@ -1,5 +1,6 @@
 /*
- * Qatja
+ * Qatja (https://github.com/Qatja)
+ *
  * Example 3: Publish to a topic
  * 
  * author: Andreas Göransson, 2014

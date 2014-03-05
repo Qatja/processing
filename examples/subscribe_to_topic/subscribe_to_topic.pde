@@ -1,5 +1,6 @@
 /*
- * Qatja
+ * Qatja (https://github.com/Qatja)
+ *
  * Example 2: Subscribe to a topic
  * 
  * author: Andreas Göransson, 2014

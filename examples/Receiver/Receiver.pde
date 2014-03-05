@@ -1,5 +1,6 @@
 /*
- * Qatja
+ * Qatja (https://github.com/Qatja)
+ *
  * Example: Receiver
  * 
  * Subscribes to mouse coordinates on topic

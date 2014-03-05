@@ -1,5 +1,6 @@
 /*
- * Qatja
+ * Qatja (https://github.com/Qatja)
+ *
  * Example 1: Connect to MQTT broker
  * 
  * author: Andreas Göransson, 2014

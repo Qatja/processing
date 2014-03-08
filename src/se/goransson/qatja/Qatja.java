@@ -60,15 +60,17 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 
 	/** */
 	private String host = null;
-	
+
 	private int port = -1;
-	
+
 	private String clientIdentifier = null;
-	
+
 	private String username = null;
-	
+
 	private String password = null;
-	
+
+	private boolean cleanSession = true;
+
 	private MonitoringThread mMonitoringThread;
 	private KeepaliveThread mKeepaliveThread;
 
@@ -162,7 +164,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	public void setKeepalive(int seconds) {
 		keepalive = seconds;
 	}
-	
+
 	/**
 	 * @return the clientIdentifier
 	 */
@@ -171,7 +173,8 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	/**
-	 * @param clientIdentifier the clientIdentifier to set
+	 * @param clientIdentifier
+	 *            the clientIdentifier to set
 	 */
 	public void setClientIdentifier(String clientIdentifier) {
 		this.clientIdentifier = clientIdentifier;
@@ -185,7 +188,8 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	/**
-	 * @param host the host to set
+	 * @param host
+	 *            the host to set
 	 */
 	public void setHost(String host) {
 		this.host = host;
@@ -199,7 +203,8 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	/**
-	 * @param port the port to set
+	 * @param port
+	 *            the port to set
 	 */
 	public void setPort(int port) {
 		this.port = port;
@@ -213,7 +218,8 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	/**
-	 * @param username the username to set
+	 * @param username
+	 *            the username to set
 	 */
 	public void setUsername(String username) {
 		this.username = username;
@@ -227,7 +233,8 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	/**
-	 * @param password the password to set
+	 * @param password
+	 *            the password to set
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -241,8 +248,23 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	/**
+	 * @return the cleanSession
+	 */
+	public boolean getCleanSession() {
+		return cleanSession;
+	}
+
+	/**
+	 * @param cleanSession
+	 *            set clean session
+	 */
+	public void setCleanSession(boolean cleanSession) {
+		this.cleanSession = cleanSession;
+	}
+
+	/**
 	 * Connect to a MQTT server. This also sends the required connect message.
-	 */	
+	 */
 	public void connect() {
 		InetAddress addr = null;
 		try {
@@ -285,8 +307,10 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	private void sendConnect() {
 		if (state == STATE_NONE) {
 			MQTTConnect connect;
-			connect = new MQTTConnect(clientIdentifier, username, password, true);
-			
+			connect = new MQTTConnect(clientIdentifier, username, password,
+					true);
+			connect.setCleanSession(getCleanSession());
+
 			keepalive = connect.getKeepAlive();
 			sendMessage(connect, false);
 		} else {
@@ -325,7 +349,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 
 	/**
 	 * Publish a message to specific topic. Quality of service is
-	 * {@link #AT_MOST_ONCE}
+	 * {@link #AT_MOST_ONCE}, no retain
 	 * 
 	 * @param topic
 	 *            the topic
@@ -337,6 +361,34 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	}
 
 	/**
+	 * Publish a message to specific topic. Quality of service is
+	 * {@link #AT_MOST_ONCE}, no retain
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param buffer
+	 *            the message
+	 */
+	public void publish(String topic, byte[] buffer) {
+		publish(topic, buffer, false);
+	}
+
+	/**
+	 * Publish a message to specific topic. Quality of service is
+	 * {@link #AT_MOST_ONCE}
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param message
+	 *            the message
+	 * @param retain
+	 *            set retain message
+	 */
+	public void publish(String topic, String message, boolean retain) {
+		publish(topic, message.getBytes(), retain);
+	}
+
+	/**
 	 * Publish a byte[] to specific topic. Quality of service is
 	 * {@link #AT_MOST_ONCE}
 	 * 
@@ -344,10 +396,39 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	 *            the topic
 	 * @param buffer
 	 *            the buffer
+	 * @param retain
+	 *            set retain message
 	 */
-	public void publish(String topic, byte[] buffer) {
+	public void publish(String topic, byte[] buffer, boolean retain) {
 		MQTTPublish msg = new MQTTPublish(topic, buffer);
+		msg.setRetain(retain);
 		sendMessage(msg);
+	}
+
+	/**
+	 * Publish a message to a specific topic. Quality of service is
+	 * {@link #AT_LEAST_ONCE}, no retain
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param message
+	 *            the message
+	 */
+	public void publishAtLeastOnce(String topic, String message) {
+		publishAtLeastOnce(topic, message.getBytes());
+	}
+
+	/**
+	 * Publish a message to a specific topic. Quality of service is
+	 * {@link #AT_LEAST_ONCE}, to retain
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param buffer
+	 *            the message
+	 */
+	public void publishAtLeastOnce(String topic, byte[] buffer) {
+		publishAtLeastOnce(topic, buffer, false);
 	}
 
 	/**
@@ -355,13 +436,58 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	 * {@link #AT_LEAST_ONCE}
 	 * 
 	 * @param topic
+	 *            the topic
 	 * @param message
+	 *            the message
+	 * @param retain
+	 *            set retain message
 	 */
-	public void publishAtLeastOnce(String topic, String message) {
-		MQTTPublish msg = new MQTTPublish(topic, message.getBytes(),
-				AT_LEAST_ONCE);
+	public void publishAtLeastOnce(String topic, String message, boolean retain) {
+		publishAtLeastOnce(topic, message.getBytes(), retain);
+	}
+
+	/**
+	 * Publish a message to a specific topic. Quality of service is
+	 * {@link #AT_LEAST_ONCE}
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param buffer
+	 *            the message
+	 * @param retain
+	 *            set retain message
+	 */
+	public void publishAtLeastOnce(String topic, byte[] buffer, boolean retain) {
+		MQTTPublish msg = new MQTTPublish(topic, buffer, AT_LEAST_ONCE);
+		msg.setRetain(retain);
 		addSentPackage(msg);
 		sendMessage(msg);
+	}
+
+	/**
+	 * Publish a message to a specific topic. Quality of service is
+	 * {@link #EXACTLY_ONCE}, no retain
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param message
+	 *            the message
+	 */
+	public void publishExactlyOnce(String topic, String message) {
+		publishExactlyOnce(topic, message.getBytes());
+	}
+
+	/**
+	 * Publish a message to a specific topic. Quality of service is
+	 * {@link #EXACTLY_ONCE}, no retain
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param buffer
+	 *            the message
+	 */
+	public void publishExactlyOnce(String topic, byte[] buffer) {
+		publishExactlyOnce(topic, buffer, false);
 	}
 
 	/**
@@ -369,15 +495,40 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	 * {@link #EXACTLY_ONCE}
 	 * 
 	 * @param topic
+	 *            the topic
 	 * @param message
+	 *            the message
+	 * @param retain
+	 *            set retain
 	 */
-	public void publishExactlyOnce(String topic, String message) {
-		MQTTPublish msg = new MQTTPublish(topic, message.getBytes(),
-				EXACTLY_ONCE);
+	public void publishExactlyOnce(String topic, String message, boolean retain) {
+		publishExactlyOnce(topic, message.getBytes(), retain);
+	}
+
+	/**
+	 * Publish a message to a specific topic. Quality of service is
+	 * {@link #EXACTLY_ONCE}
+	 * 
+	 * @param topic
+	 *            the topic
+	 * @param buffer
+	 *            the message
+	 * @param retain
+	 *            set retain
+	 */
+	public void publishExactlyOnce(String topic, byte[] buffer, boolean retain) {
+		MQTTPublish msg = new MQTTPublish(topic, buffer, EXACTLY_ONCE);
+		msg.setRetain(retain);
 		addSentPackage(msg);
 		sendMessage(msg);
 	}
 
+	/**
+	 * Subscribe to topic
+	 * 
+	 * @param topic
+	 *            the topic
+	 */
 	public void subscribe(String topic) {
 		subscribe(topic, AT_MOST_ONCE);
 	}
@@ -435,7 +586,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 			}
 			sendMessage(msg);
 		}
-		
+
 		for (MQTTMessage msg : receivedPackages.values()) {
 			if (msg instanceof MQTTPublish) {
 				((MQTTPublish) msg).setDup();
@@ -476,36 +627,36 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 		}
 	}
 
-//	/**
-//	 * 
-//	 * @param topic
-//	 * @return
-//	 */
-//	private boolean registerSubscription(String topic, String method) {
-//		Method m = null;
-//
-//		try {
-//			m = mPApplet.getClass().getMethod(method, MQTTMessage.class);
-//		} catch (Exception e) {
-//			if (DEBUG)
-//				PApplet.println("Ohno! Something went wrong... MQTT Error, you forgot to add the subscription method! 1 "
-//						+ topic);
-//			if (DEBUG)
-//				e.printStackTrace();
-//			return false;
-//		}
-//
-//		// Add the callback
-//		if (m != null) {
-//			subscriptions.put(topic, m);
-//		} else {
-//			if (DEBUG)
-//				PApplet.println("Ohno! Something went wrong... MQTT Error, you forgot to add the subscription method! 2 "
-//						+ topic);
-//			return false;
-//		}
-//		return true;
-//	}
+	// /**
+	// *
+	// * @param topic
+	// * @return
+	// */
+	// private boolean registerSubscription(String topic, String method) {
+	// Method m = null;
+	//
+	// try {
+	// m = mPApplet.getClass().getMethod(method, MQTTMessage.class);
+	// } catch (Exception e) {
+	// if (DEBUG)
+	// PApplet.println("Ohno! Something went wrong... MQTT Error, you forgot to add the subscription method! 1 "
+	// + topic);
+	// if (DEBUG)
+	// e.printStackTrace();
+	// return false;
+	// }
+	//
+	// // Add the callback
+	// if (m != null) {
+	// subscriptions.put(topic, m);
+	// } else {
+	// if (DEBUG)
+	// PApplet.println("Ohno! Something went wrong... MQTT Error, you forgot to add the subscription method! 2 "
+	// + topic);
+	// return false;
+	// }
+	// return true;
+	// }
 
 	private void addSentPackage(MQTTMessage msg) {
 		sentPackages.put(msg.getPackageIdentifier(), msg);
@@ -514,7 +665,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 	private void removeSentPackage(MQTTMessage msg) {
 		sentPackages.remove(msg.getPackageIdentifier());
 	}
-	
+
 	private void addReceivedPackage(MQTTMessage msg) {
 		receivedPackages.put(msg.getPackageIdentifier(), msg);
 	}
@@ -547,7 +698,8 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 		if (checkConnection) {
 			if (state == STATE_CONNECTED) {
 				if (DEBUG)
-					PApplet.println("Sending " + MQTTHelper.decodePackageName(msg));
+					PApplet.println("Sending "
+							+ MQTTHelper.decodePackageName(msg));
 				try {
 					mConnection.getOutputStream().write(msg.get());
 					last_action = System.currentTimeMillis();
@@ -660,7 +812,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 
 				if (len > 0) {
 					byte type = MQTTHelper.decode(buffer);
-					
+
 					if (DEBUG)
 						PApplet.println(MQTTHelper.decodePackageName(type));
 
@@ -711,18 +863,20 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 							break;
 						case AT_LEAST_ONCE:
 							// Send PUBACK
-							MQTTPuback puback_ = new MQTTPuback(publish.getPackageIdentifier());
+							MQTTPuback puback_ = new MQTTPuback(
+									publish.getPackageIdentifier());
 							if (DEBUG)
 								PApplet.println("Got "
 										+ MQTTHelper.decodePackageName(publish)
 										+ " with QoS AT LEAST ONCE, sending "
 										+ MQTTHelper.decodePackageName(puback_));
 							sendMessage(puback_);
-							
+
 							break;
 						case EXACTLY_ONCE:
 							// Send PUBREC and store message
-							MQTTPubrec pubrec_ = new MQTTPubrec(publish.getPackageIdentifier());
+							MQTTPubrec pubrec_ = new MQTTPubrec(
+									publish.getPackageIdentifier());
 							if (DEBUG)
 								PApplet.println("Got "
 										+ MQTTHelper.decodePackageName(publish)
@@ -730,29 +884,28 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 										+ MQTTHelper.decodePackageName(pubrec_));
 							addReceivedPackage(pubrec_);
 							sendMessage(pubrec_);
-							
+
 							break;
 						}
-						
-						
-//						Method eventMethod = subscriptions
-//								.get(msg.variableHeader.get("topic_name"));
-//
-//						if (eventMethod != null) {
-//							try {
-//								eventMethod.invoke(mPApplet, msg);
-//							} catch (IllegalAccessException e) {
-//								if (DEBUG)
-//									e.printStackTrace();
-//							} catch (IllegalArgumentException e) {
-//								if (DEBUG)
-//									e.printStackTrace();
-//							} catch (InvocationTargetException e) {
-//								if (DEBUG)
-//									e.printStackTrace();
-//							}
-//						}
-						
+
+						// Method eventMethod = subscriptions
+						// .get(msg.variableHeader.get("topic_name"));
+						//
+						// if (eventMethod != null) {
+						// try {
+						// eventMethod.invoke(mPApplet, msg);
+						// } catch (IllegalAccessException e) {
+						// if (DEBUG)
+						// e.printStackTrace();
+						// } catch (IllegalArgumentException e) {
+						// if (DEBUG)
+						// e.printStackTrace();
+						// } catch (InvocationTargetException e) {
+						// if (DEBUG)
+						// e.printStackTrace();
+						// }
+						// }
+
 						// Always send to "the callback" output
 						try {
 							callback.invoke(mPApplet, publish);
@@ -766,7 +919,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 							if (DEBUG)
 								e.printStackTrace();
 						}
-						
+
 						break;
 					case PUBACK:
 						MQTTPuback puback = new MQTTPuback(buffer, len);
@@ -786,10 +939,11 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 					case PUBREL:
 						MQTTPubrel pubrel = new MQTTPubrel(buffer, len);
 						removeReceivedPackage(pubrel);
-						
-						MQTTPubcomp pubcomp_ = new MQTTPubcomp(pubrel.getPackageIdentifier());
+
+						MQTTPubcomp pubcomp_ = new MQTTPubcomp(
+								pubrel.getPackageIdentifier());
 						sendMessage(pubcomp_);
-						
+
 						break;
 					case PUBCOMP:
 						MQTTPubcomp pubcomp = new MQTTPubcomp(buffer, len);
@@ -798,7 +952,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 						break;
 					case SUBSCRIBE:
 						// Client doesn't receive this message
-						
+
 						break;
 					case SUBACK:
 						MQTTSuback suback = new MQTTSuback(buffer, len);
@@ -807,7 +961,7 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 						break;
 					case UNSUBSCRIBE:
 						// Client doesn't receive this message
-						
+
 						break;
 					case UNSUBACK:
 						MQTTUnsuback unsuback = new MQTTUnsuback(buffer, len);
@@ -818,11 +972,11 @@ public class Qatja implements MQTTConstants, MQTTConnectionConstants {
 					case PINGREQ:
 						// Client doesn't receive this message
 						last_ping_request = System.currentTimeMillis();
-						
+
 						break;
 					case PINGRESP:
 						ping_sent = false;
-						
+
 						break;
 					}
 				}

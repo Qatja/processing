@@ -1,4 +1,4 @@
-<project name="Qatja" default="clean" basedir="../">
+<project name="Qatja-processing" default="clean" basedir="../">
 
     
 <!--	
